@@ -1,0 +1,195 @@
+ 
+{extend name="common/basic" /}
+
+{block name="title"}admin{/block}
+
+{block name="content"}
+<link rel="stylesheet" href="/static/module/treetable-lay/treetable.css" media="all">
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <div style="padding-bottom: 10px;">
+                <div>
+                    <button class="layui-btn layuiadmin-btn-useradmin" data-type="add">添加</button>
+                    <button type="button" class="layui-btn layui-btn-normal" id="btn-expand">全部展开</button>
+                    <button type="button" class="layui-btn layui-btn-danger" id="btn-fold">全部折叠</button>
+                    <input type="text" id="edt-search"  name="name" placeholder="输入关键字"  style="width: 120px;"  >
+                    <button class="layui-btn" id="btn-search">&nbsp;&nbsp;搜索&nbsp;&nbsp;</button>
+                </div>
+            </div>
+            <table id="auth-table" class="layui-table" lay-filter="auth-table"></table>
+            <script type="text/html" id="barDemo">
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+                <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="pwd"><i class="layui-icon layui-icon-edit"></i>修改密码</a>
+            </script>
+        </div>
+    </div>
+</div>
+<style>
+    input {
+        height: 35px;
+        line-height: 35px;
+        padding: 0 7.9px;
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        margin-bottom: -2px;
+        outline: none;
+    }
+
+    input:focus {
+        border-color: #009E94;
+    }
+</style>
+{/block}
+
+{block name="js"}
+
+<script>
+    layui.config({
+        base: '__layuiadmin__'
+    }).extend({
+        treetable: '/layui/lay/modules/treetable'
+    }).use(['table', 'form', 'element', 'treetable'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var treetable = layui.treetable;
+        // 渲染表格
+        var renderTable = function () {
+            layer.load(2);
+            treetable.render({
+                treeColIndex: 2,
+                treeSpid: 0,
+                treeIdName: 'id',
+                treePidName: 'pid',
+                elem: '#auth-table',
+                url: 'http://www.tp6api.com:8006/admin/Rule/list',
+                page: false,
+                cols: [[
+                    {type: 'numbers'},
+                    // {field: 'id', title: 'id'},
+                    {field: 'title', title: '权限名称'},
+                    {field: 'name', title: 'url'},
+                    {field: 'pid', title: '上级节点'},
+                    {fixed: 'right', title:'操作', toolbar: '#barDemo',width:260}
+                ]],
+                done: function () {
+                    layer.closeAll('loading');
+                }
+            });
+        };
+        renderTable();
+        //展开
+        $('#btn-expand').click(function () {
+            treetable.expandAll('#auth-table');
+        });
+        //折叠
+        $('#btn-fold').click(function () {
+            treetable.foldAll('#auth-table');
+        });
+        //搜索
+        $('#btn-search').click(function () {
+            var keyword = $('#edt-search').val();
+            var searchCount = 0;
+            $('#auth-table').next('.treeTable').find('.layui-table-body tbody tr td').each(function () {
+                $(this).css('background-color', 'transparent');
+                var text = $(this).text();
+                if (keyword != '' && text.indexOf(keyword) >= 0) {
+                    $(this).css('background-color', 'rgba(250,230,160,0.5)');
+                    if (searchCount == 0) {
+                        treetable.expandAll('#auth-table');
+                        $('html,body').stop(true);
+                        $('html,body').animate({scrollTop: $(this).offset().top - 150}, 500);
+                    }
+                    searchCount++;
+                }
+            });
+            if (keyword == '') {
+                layer.msg("请输入搜索内容", {icon: 5});
+            } else if (searchCount == 0) {
+                layer.msg("没有匹配结果", {icon: 5});
+            }
+        });
+        var active = {
+            batchdel: function(){
+                var checkStatus = table.checkStatus('LAY-user-manage')
+                    ,checkData = checkStatus.data; //得到选中的数据
+
+                if(checkData.length === 0){
+                    return layer.msg('请选择数据');
+                }
+
+                // layer.prompt({
+                //     formType: 1
+                //     ,title: '敏感操作，请验证口令'
+                // }, function(value, index){
+                //     layer.close(index);
+                //
+                //     layer.confirm('确定删除吗？', function(index) {
+                //
+                //
+                //         //执行 Ajax 后重载
+                //         /*
+                //         admin.req({
+                //           url: 'xxx'
+                //           //,……
+                //         });
+                //         */
+                //         table.reload('LAY-admin-manage');
+                //         layer.msg('已删除');
+                //     });
+                // });
+            }
+            ,add: function(){
+                layer.open({
+                    type: 2
+                    ,title: ['添加权限','color:#fff;background-color:#009688;']
+                    ,content: 'addRule'
+                    ,maxmin: true
+                    ,area: ['770px', '520px']
+                });
+            }
+        };
+        $('.layui-btn.layuiadmin-btn-useradmin').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        //监听行工具事件
+        table.on('tool(auth-table)', function(obj){
+            var data = obj.data;
+            //console.log(obj)
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "deleteRule",
+                        type: "get",
+                        data: {id:data.id},
+                        success: function (res) {
+                            if (res.code == 1) {
+                                layer.msg(res.msg, {icon: 6});
+                                obj.del();
+                                parent.layui.table.reload('items');//重载父页表格，参数为表格ID
+                                layer.close(index);
+                            } else {
+                                layer.msg(res.msg, {icon: 5});
+                            }
+                        }
+                    });
+                    return false;
+                });
+            } else if(obj.event === 'edit'){
+                layer.open({
+                    type: 2
+                    ,title: '修改文章'
+                    ,content: 'editRule?id='+data.id
+                    ,maxmin: true
+                    ,area: ['1200px', '590px']
+                });
+            }
+        });
+    });
+</script>
+
+{/block}

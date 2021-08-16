@@ -1,0 +1,148 @@
+
+{extend name="common/basic" /}
+
+{block name="title"}admin{/block}
+
+{block name="content"}
+<div class="layui-fluid">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <script type="text/html" id="toolbarDemo">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-sm layui-bg-blue" lay-event="add">新增</button>
+                    <button class="layui-btn layui-btn-sm layui-bg-red" lay-event="del">删除</button>
+                    <button class="layui-btn layui-btn-sm layui-bg-black" lay-event="reload">刷新</button>
+                </div>
+            </script>
+            <table class="layui-hide" id="test" lay-filter="test"></table>
+            <script type="text/html" id="barDemo">
+                <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+                <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+
+            </script>
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="footer_js"}
+<script>
+    layui.use(['table','jquery'], function(){
+        // var $ = layui.$
+        // var table = layui.table;
+        var $ = layui.$
+            ,form = layui.form
+            ,table = layui.table
+            ,laydate =layui.laydate;
+        table.render({
+            elem: '#test'
+            ,url:$api+'admin/group/getList'
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,response: {
+                statusName: 'code' //规定数据状态的字段名称，默认：code
+                ,statusCode: 200 //规定成功的状态码，默认：0
+                ,msgName: 'msg' //规定状态信息的字段名称，默认：msg
+                ,countName: 'total' //规定数据总数的字段名称，默认：count
+                ,dataName: 'data' //规定数据列表的字段名称，默认：data
+            }
+            ,cols: [[
+                {type: 'checkbox', fixed: 'left'}
+                ,{field:'id', title:'ID', width:80, fixed: 'left', unresize: true, sort: true}
+                ,{field:'name', title:'角色名称', width:120,}
+                ,{field:'auth_role', title:'授权节点',}
+                ,{field:'create_time', title:'创建时间',  sort: true}
+                ,{field:'update_time', title:'修改时间',  sort: true}
+                ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+            ]]
+            ,page:  false
+        });
+        table.on('toolbar(test)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            if(obj.event==="add"){
+                layer.open({
+                    type: 2
+                    ,title: ['更新添加农机分类','color:#fff;background-color:#2F4056;']
+                    ,content: 'add'
+                    ,maxmin: true
+                    // ,btn : ['关闭']
+                    ,area : ['40%', '50%'], // 高度设置为95%,防止超出可视范围
+                });
+                return false;
+            }else if(obj.event==="reload"){
+                table.reload('test');
+            }else if(obj.event==="del"){
+                var num=0;
+                var id=[];
+                for (var i in data) {
+                    num++;
+                    id.push(data[i].id);
+                }
+                if (id.length <1){
+                    layer.msg("请至少选择一个",{icon:15,time:1000,shade:0.3});
+                    return  false;
+                }
+                $.ajax({
+                    url: $api+'admin/FarmerType/delete',
+                    type: "post",
+                    data: {id:id},
+                    success: function (res) {
+                        if (res.code == 204) {
+                            layer.msg(res.msg, {time:2500, shade:0.3}, function (){
+                                // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                                table.reload('test');
+                                // layer.close(index);
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 5});
+                        }
+                    }
+                });
+                return false;
+
+            }else if(obj.event==="recycle"){
+                lucky.CreateOpenForm("回收站","{:url('recycle')}");
+                return false;
+            }
+        });
+        //监听行工具事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            var _id=parseInt(data.id);
+            console.log(_id)
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: $api+'admin/FarmerType/delete',
+                        type: "post",
+                        data: {id:_id},
+                        success: function (res) {
+                            if (res.code == 204) {
+                                layer.msg(res.msg, {time:2500, shade:0.3}, function (){
+                                    // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                                    table.reload('test');
+                                    layer.close(index);
+                                });
+                            } else {
+                                layer.msg(res.msg, {icon: 5});
+                            }
+                        }
+                    });
+                    return false;
+                });
+            } else if(obj.event === 'edit'){
+                layer.open({
+                    type: 2
+                    ,title: ['更新添加农机分类','color:#fff;background-color:#2F4056;']
+                    ,content: $api+'admin/FarmerType/edit?id='+_id
+                    // ,content: '/admin/Expert/pwd?id='+data.id
+                    ,maxmin: true
+                    // ,btn : ['关闭']
+                    ,area : ['40%', '50%'], // 高度设置为95%,防止超出可视范围
+                });
+                return false;
+            }
+        });
+    });
+</script>
+{/block}

@@ -1,0 +1,99 @@
+<div class="layui-side layui-side-menu">
+    <div class="layui-side-scroll">
+        <div class="layui-logo" lay-href="home/console.html">
+            <span>Admin</span>
+        </div>
+
+        <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
+            <li data-name="home" class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <i class="layui-icon layui-icon-home"></i>
+                    <cite>主页</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd data-name="console" class="layui-this">
+                        <a lay-href="home/console.html">控制台</a>
+                    </dd>
+                    <dd data-name="console">
+                        <a lay-href="{:url('index/homepage1')}">主页一</a>
+                    </dd>
+                    <dd data-name="console">
+                        <a lay-href="home/homepage2.html">主页二</a>
+                    </dd>
+                </dl>
+            </li>
+            <li data-name="set" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="设置" lay-direction="2">
+                    <i class="layui-icon layui-icon-set"></i>
+                    <cite>权限管理</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd class="layui-nav-itemed">
+                        <a href="javascript:;">管理员管理</a>
+                        <dl class="layui-nav-child">
+                            <dd><a lay-href={:url('admin/index')}>管理员列表</a></dd>
+                        </dl>
+                    </dd>
+                    <dd class="layui-nav-itemed">
+                        <a href="javascript:;">权限设置</a>
+                        <dl class="layui-nav-child">
+                            <dd><a lay-href={:url('rule/index')}>菜单列表</a></dd>
+                            <dd><a lay-href="{:url('group/index')}">修改密码</a></dd>
+                        </dl>
+                    </dd>
+                </dl>
+            </li>
+            <li data-name="home" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <i class="layui-icon layui-icon-home"></i>
+                    <cite>土地流转</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd data-name="console" >
+                        <a lay-href="{:url('Land/index')}">土地流转</a>
+                    </dd>
+                    <dd data-name="console">
+                        <a lay-href="{:url('LandType/index')}">土地类型</a>
+                    </dd>
+                    <dd data-name="console" >
+                        <a lay-href="{:url('LatinType/index')}">流转类型</a>
+                    </dd>
+                </dl>
+            </li>
+            <li data-name="home" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <i class="layui-icon layui-icon-home"></i>
+                    <cite>农机服务</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd data-name="console" >
+                        <a lay-href="{:url('Land/index')}">土地流转</a>
+                    </dd>
+                    <dd data-name="console">
+                        <a lay-href="{:url('FarmerType/index')}">农机类型</a>
+                    </dd>
+                    <dd data-name="console" >
+                        <a lay-href="{:url('FarmerService/index')}">服务类型</a>
+                    </dd>
+                </dl>
+            </li>
+            <li data-name="home" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="主页" lay-direction="2">
+                    <i class="layui-icon layui-icon-home"></i>
+                    <cite>服务商</cite>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd data-name="console" >
+                        <a lay-href="{:url('Company/index')}">服务商列表</a>
+                    </dd>
+<!--                    <dd data-name="console">-->
+<!--                        <a lay-href="{:url('FarmerType/index')}">农机类型</a>-->
+<!--                    </dd>-->
+<!--                    <dd data-name="console" >-->
+<!--                        <a lay-href="{:url('FarmerService/index')}">服务类型</a>-->
+<!--                    </dd>-->
+                </dl>
+            </li>
+        </ul>
+    </div>
+</div>

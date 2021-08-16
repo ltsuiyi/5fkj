@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+{include file="common/header"}
+<body>
+<div class="layui-fluid" style="padding-top: 20px">
+    <form class="layui-form layui-form-pane" action="">
+        <input type="hidden" name="id" value="{$info.id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">分类名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="title" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="{$info.title}">
+            </div>
+        </div>
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">转态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="显示"  {if $info.status == 1}checked{/if}>
+                <input type="radio" name="status" value="-1" title="隐藏" {if $info.status == -1}checked{/if}>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__layuiadmin__/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var $ = layui.$
+            ,form = layui.form
+            ,layer = layui.layer
+        //监听提交
+        form.on('submit(demo1)', function(data){
+            var data = data.field;
+            $.ajax({
+                url: 'add',
+                type : "POST",
+                async: false,
+                dataType : "json",
+                data:data,
+                success : function(res) {
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {time:2000, shade:0.3}, function (){
+                            // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                            // // table.reload('test');
+                            // layer.close(index);
+                            window.parent.location.reload();
+                            parent.layer.close(index);     //添加成功之后销毁当前弹窗
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 5});
+                    }
+                },
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

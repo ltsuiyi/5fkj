@@ -1,0 +1,168 @@
+
+{extend name="common/basic" /}
+
+{block name="title"}layuiAdmin 控制台主页一{/block}
+
+{block name="content"}
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-form layui-card-header layuiadmin-card-header-auto">
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">登录名</label>
+          <div class="layui-input-block">
+            <input type="text" name="loginname" placeholder="请输入" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-inline">
+          <label class="layui-form-label">手机</label>
+          <div class="layui-input-block">
+            <input type="text" name="telphone" placeholder="请输入" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-inline">
+          <label class="layui-form-label">邮箱</label>
+          <div class="layui-input-block">
+            <input type="text" name="email" placeholder="请输入" autocomplete="off" class="layui-input">
+          </div>
+        </div>
+        <div class="layui-inline">
+          <label class="layui-form-label">角色</label>
+          <div class="layui-input-block">
+            <select name="role">
+              <option value="0">管理员</option>
+              <option value="1">超级管理员</option>
+              <option value="2">纠错员</option>
+              <option value="3">采购员</option>
+              <option value="4">推销员</option>
+              <option value="5">运营人员</option>
+              <option value="6">编辑</option>
+            </select>
+          </div>
+        </div>
+        <div class="layui-inline">
+          <button class="layui-btn layuiadmin-btn-admin" lay-submit lay-filter="LAY-user-back-search">
+            <i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="layui-card-body">
+      <div style="padding-bottom: 10px;">
+        <button class="layui-btn layuiadmin-btn-admin" data-type="batchdel">删除</button>
+        <button class="layui-btn layuiadmin-btn-admin" data-type="add">添加</button>
+      </div>
+
+<!--      <table id="LAY-user-back-manage" lay-filter="LAY-user-back-manage"></table>-->
+
+      <table class="layui-hide" id="test" lay-filter="test"></table>
+
+      <script type="text/html" id="buttonTpl">
+        {{#  if(d.check == true){ }}
+        <button class="layui-btn layui-btn-xs">已审核</button>
+        {{#  } else { }}
+        <button class="layui-btn layui-btn-primary layui-btn-xs">未审核</button>
+        {{#  } }}
+      </script>
+
+      <script type="text/html" id="table-useradmin-admin">
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit"><i class="layui-icon layui-icon-edit"></i>编辑</a>
+        {{#  if(d.role == '超级管理员'){ }}
+        <a class="layui-btn layui-btn-disabled layui-btn-xs"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        {{#  } }}
+      </script>
+    </div>
+  </div>
+</div>
+{/block}
+
+{block name="footer_js"}
+<script>
+  layui.use('table', function(){
+    var table = layui.table;
+    table.render({
+      elem: '#test'
+      ,url:$api+'admin/admin/getList'
+      ,response: {
+        statusName: 'code' //规定数据状态的字段名称，默认：code
+        ,statusCode: 200 //规定成功的状态码，默认：0
+        ,msgName: 'msg' //规定状态信息的字段名称，默认：msg
+        ,countName: 'total' //规定数据总数的字段名称，默认：count
+        ,dataName: 'data' //规定数据列表的字段名称，默认：data
+      }
+      ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+      ,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+        title: '提示'
+        ,layEvent: 'LAYTABLE_TIPS'
+        ,icon: 'layui-icon-tips'
+      }]
+      ,title: '用户数据表'
+      ,cols: [[
+        {type: 'checkbox', fixed: 'left'}
+        ,{field:'id', title:'ID', width:80, fixed: 'left', unresize: true, sort: true}
+        ,{field:'username', title:'用户名', width:120, edit: 'text'}
+        ,{field:'email', title:'邮箱', width:150, edit: 'text', templet: function(res){
+            return '<em>'+ res.email +'</em>'
+          }}
+        ,{field:'sex', title:'性别', width:80, edit: 'text', sort: true}
+        ,{field:'city', title:'城市', width:100}
+        ,{field:'sign', title:'签名'}
+        ,{field:'experience', title:'积分', width:80, sort: true}
+        ,{field:'ip', title:'IP', width:120}
+        ,{field:'logins', title:'登入次数', width:100, sort: true}
+        ,{field:'joinTime', title:'加入时间', width:120}
+        ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+      ]]
+      ,page: true
+    });
+
+    //头工具栏事件
+    table.on('toolbar(test)', function(obj){
+      var checkStatus = table.checkStatus(obj.config.id);
+      switch(obj.event){
+        case 'getCheckData':
+          var data = checkStatus.data;
+          layer.alert(JSON.stringify(data));
+          break;
+        case 'getCheckLength':
+          var data = checkStatus.data;
+          layer.msg('选中了：'+ data.length + ' 个');
+          break;
+        case 'isAll':
+          layer.msg(checkStatus.isAll ? '全选': '未全选');
+          break;
+
+              //自定义头工具栏右侧图标 - 提示
+        case 'LAYTABLE_TIPS':
+          layer.alert('这是工具栏右侧自定义的一个图标按钮');
+          break;
+      };
+    });
+
+    //监听行工具事件
+    table.on('tool(test)', function(obj){
+      var data = obj.data;
+      //console.log(obj)
+      if(obj.event === 'del'){
+        layer.confirm('真的删除行么', function(index){
+          obj.del();
+          layer.close(index);
+        });
+      } else if(obj.event === 'edit'){
+        layer.prompt({
+          formType: 2
+          ,value: data.email
+        }, function(value, index){
+          obj.update({
+            email: value
+          });
+          layer.close(index);
+        });
+      }
+    });
+  });
+</script>
+{/block}

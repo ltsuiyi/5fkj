@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+{include file="common/header"}
+<body>
+<div class="layui-fluid" style="padding-top: 20px">
+    <form class="layui-form layui-form-pane" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">权限名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="name" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label label-required-next">选择权限</label>
+                <div class="layui-input-inline input-custom-width">
+                    <div id="test7" class="demo-tree"></div>
+                </div>
+            </div>
+<!--        <div class="layui-form-item">-->
+<!--            <div class="layui-input-block">-->
+<!--                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>-->
+<!--                <button type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="layui-form-item layui-layout-admin " style="width: 100%">
+            <div class="layui-input-block">
+                <div class="layui-footer" style="left: 0px;text-align: center;">
+                    <input type="button" lay-submit lay-filter="LAY-user-front-submit" id="LAY-user-front-submit" value="提交" class="layui-btn" lay-demo="getChecked">
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__layuiadmin__/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layer','tree','jquery', 'util'], function() {
+        var form = layui.form,
+            layer = layui.layer,
+            tree = layui.tree,
+            util = layui.util,
+            $ = layui.$
+        tree.render({
+            elem: '#test7'
+            ,data: getData()
+            ,showCheckbox: true
+            ,spread:true
+            ,onlyIconControl: true
+            ,id: 'demoId1' //定义索引
+            ,click: function(obj){
+                var data = obj.data;  //获取当前点击的节点数据
+                layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+            }
+        });
+        // util.event('lay-demo', {
+        //     getChecked: function(othis){
+        //         var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+        //         var list = [];
+        //         list = getChecked_list(checkedData);
+        //         var name = list;
+        //
+        //         $.ajax({
+        //             url:"{:url('addRule')}",  //这里跳到后台控制器
+        //             data: $('form').serialize(),
+        //             type:"POST",
+        //             success: function(data){
+        //                 if (data.code==1) {
+        //                     layer.msg(data.msg,{time:1000,icon: 1},function(){
+        //                         window.parent.location.reload();
+        //                         parent.layer.close(index);     //添加成功之后销毁当前弹窗
+        //                     })
+        //                 }else{
+        //                     layer.msg(data.msg,{time:2000,icon: data.status});
+        //                 }
+        //             }
+        //         });
+        //     }
+        //
+        // });
+        function getChecked_list(data) {
+            var id = "";
+            $.each(data, function (index, item) {
+                if (id != "") {
+                    id = id + "," + item.id;
+                } else {
+                    id = item.id;
+                }
+                var i = getChecked_list(item.children);
+                if (i != "") {
+                    id = id + "," + i;
+                }
+            });
+            return id;
+        }
+
+        function getData(){
+            var data = [];
+            $.ajax({
+                url: "{:url('tree')}",    //后台数据请求地址
+                type: "post",
+                async:false,
+                success: function(resut){
+                    data = resut;
+                }
+            });
+            return data;
+        }
+        window.onload = getData;
+        $("#LAY-user-front-submit").click(function(){
+            alert(234);
+
+            $.ajax({
+                url: 'doAll',
+                type : "POST",
+                async: false,
+                dataType : "json",
+                data:$('form').serialize(),
+                success : function(res) {
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {time:2000, shade:0.3}, function (){
+                            // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                            // // table.reload('test');
+                            // layer.close(index);
+                            window.parent.location.reload();
+                            parent.layer.close(index);     //添加成功之后销毁当前弹窗
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 5});
+                    }
+                },
+            });
+            // $.ajax({
+            //     url:"{:url('add')}",  //这里跳到后台控制器
+            //     data:$('form').serialize(),
+            //     type:"POST",
+            //     success: function(data){
+            //         if (data.code==1) {
+            //             layer.msg(data.msg,{time:1000,icon: 1},function(){
+            //                 window.parent.location.reload();
+            //                 parent.layer.close(index);     //添加成功之后销毁当前弹窗
+            //             })
+            //         }else{
+            //             layer.msg(data.msg,{time:2000,icon: data.status});
+            //         }
+            //     }
+            // });
+        });
+    });
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+
+{extend name="common/basic" /}
+
+{block name="title"}admin{/block}
+
+{block name="content"}
+<div class="layui-col-md12">
+    <div class="layui-card">
+        <div class="layui-card-body layui-row ">
+            <fieldset class="layui-elem-field">
+                <legend>搜索区</legend>
+                <div class="layui-field-box">
+                    <form action="" class="layui-form" method="get">
+                        <div class="layui-form-item layui-form-pane">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">选择时间：</label>
+                                <div class="layui-input-inline">
+                                    <input name="time" class="layui-input" id="time" value="" type="text" placeholder="请选择时间范围">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button class="layui-btn icon-btn layui-btn-sm" data-id="table_id" lay-filter="search" lay-submit="">
+                                    <i class="layui-icon"></i>搜索
+                                </button>
+                                <button type="reset" class="layui-btn icon-btn layui-btn-normal layui-btn-sm"><i class="layui-icon layui-icon-refresh"></i>重置</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+
+    </div>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <!--表格区-->
+            <table class="layui-hide" id="test" lay-filter="test"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-btn-info" lay-event="recycle">恢复</button>
+        <button class="layui-btn layui-btn-sm layui-bg-red" lay-event="del">批量删除</button>
+        <button class="layui-btn layui-btn-sm layui-bg-black" lay-event="reload">刷新</button>
+    </div>
+</script>
+<script type="text/html" id="buttonTpl">
+    {{#  if(d.status == 1){ }}
+    <button class="layui-btn layui-bg-blue layui-btn-xs">显示</button>
+    {{#  } else { }}
+    <button class="layui-btn layui-bg-red layui-btn-xs">隐藏</button>
+    {{#  } }}
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+
+</script>
+{/block}
+{block name="footer_js"}
+<script>
+    layui.use(['table','jquery','laydate','util'], function(){
+        var $ = layui.$
+            ,form = layui.form
+            ,table = layui.table
+            ,laydate =layui.laydate;
+        var util = layui.util;
+
+        /*日期选择
+        * */
+        laydate.render({
+            elem: '#time'
+            ,range: '~'
+        });
+
+        /*
+     * 渲染列表数据*/
+        table.render({
+            elem: '#test'
+            ,url:$api+'admin/Admin/getRecycleData'
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示'
+                ,layEvent: 'LAYTABLE_TIPS'
+                ,icon: 'layui-icon-tips'
+            }]
+            ,page: true
+            ,response: {
+                statusName: 'code' //规定数据状态的字段名称，默认：code
+                ,statusCode: 200 //规定成功的状态码，默认：0
+                ,msgName: 'msg' //规定状态信息的字段名称，默认：msg
+                ,countName: 'count' //规定数据总数的字段名称，默认：count
+                ,dataName: 'data' //规定数据列表的字段名称，默认：data
+            }
+            ,title: '用户数据表'
+            ,cols: [[
+                {type: 'checkbox', fixed: 'left'}
+                ,{field:'id', title:'ID', fixed: 'left', unresize: true, sort: true}
+                ,{field:'user_name', title:'用户名',width:120, }
+                // ,{field: 'title', title: '土地分类',width:100,templet:function(res){
+                //         return res.LandType.title;
+                //     }}
+                // ,{field: 'title', title: '流转类型',width:100,templet:function(res){
+                //         return res.LatinType.title;
+                //     }}
+                ,{field:'real_name', title:'真实姓名',width:100,}
+                ,{field:'phone', title:'手机号',width:80,}
+                ,{field:'head_image', title:'头像',width:80,}
+                ,{field:'login_ip', title:'登录IP', width:80, }
+                ,{field:'login_times', title:'登录次数', width:120}
+                ,{field:'group_id', title:'所属用户组', width:140,}
+                ,{field:'company_id', title:'所属公司', width:140,}
+                ,{field:'sex', title:'性别', width:120,}
+                ,{field:'status', title:'状态', width:120,}
+                ,{field:'login_time', title:'最后登录时间', width:160,templet: function (d) {
+                        if(d.login_time == 0){
+                            return  '';
+                        }else{
+                            return util.toDateString(d.login_time * 1000, "yyyy-MM-dd HH:mm:ss")
+                        }
+                    }}
+                ,{field:'create_time', title:'添加时间', width:160}
+                ,{field:'update_time', title:'修改时间', width:160}
+                ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+            ]],
+            done: function (res) {
+                layer.closeAll('loading');
+            }
+
+        });
+        /*
+        * 监听搜索*/
+        form.on('submit(search)', function (data) {
+            var field = data.field;
+            table.reload('test', {
+                where: field
+                , page: {
+                    curr: 1 // 重载后从第一页开始
+                }
+            });
+            return false;  // 阻止submit的表单提交
+        });
+
+        /*
+        * 头工具栏事件*/
+        table.on('toolbar(test)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            if(obj.event==="recycle")
+            {
+                var nums=0;
+                var idd=[];
+                for (var i in data) {
+                    nums++;
+                    idd.push(data[i].id);
+                }
+                if (idd.length <1){
+                    layer.msg("请至少选择一个",{icon:15,time:1000,shade:0.3});
+                    return  false;
+                }
+                $.ajax({
+                    url: $api+'admin/admin/recycleData',
+                    type: "post",
+                    data: {id:idd},
+                    success: function (res) {
+                        if (res.code == 200) {
+                            layer.msg(res.msg, {time:2500, shade:0.3}, function (){
+                                // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                                table.reload('test');
+                                // layer.close(index);
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 5});
+                        }
+                    }
+                });
+                return false;
+            }else if(obj.event==="reload"){
+                table.reload('test');
+            }else if(obj.event==="del"){
+                var num=0;
+                var id=[];
+                for (var i in data) {
+                    num++;
+                    id.push(data[i].id);
+                }
+                if (id.length <1){
+                    layer.msg("请至少选择一个",{icon:15,time:1000,shade:0.3});
+                    return  false;
+                }
+                $.ajax({
+                    url: $api+'admin/admin/delTrue',
+                    type: "post",
+                    data: {id:id},
+                    success: function (res) {
+                        if (res.code == 200) {
+                            layer.msg(res.msg, {time:2500, shade:0.3}, function (){
+                                // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                                table.reload('test');
+                                // layer.close(index);
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 5});
+                        }
+                    }
+                });
+                return false;
+            }
+        });
+
+        /*
+       * 操作栏*/
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            var _id=parseInt(data.id);
+            console.log(_id)
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: $api+'admin/admin/delTrue',
+                        type: "post",
+                        data: {id:_id},
+                        success: function (res) {
+                            if (res.code == 200) {
+                                layer.msg(res.msg, {time:2500, shade:0.3}, function (){
+                                    // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                                    table.reload('test');
+                                    layer.close(index);
+                                });
+                            } else {
+                                layer.msg(res.msg, {icon: 5});
+                            }
+                        }
+                    });
+                    return false;
+                });
+            }
+        });
+    });
+</script>
+{/block}

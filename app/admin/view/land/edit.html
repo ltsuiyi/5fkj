@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+{include file="common/header"}
+<style type="text/css">
+    .uploader-list {
+        margin-left: -15px;
+    }
+
+    .uploader-list .info {
+        position: relative;
+        margin-top: -25px;
+        background-color: black;
+        color: white;
+        filter: alpha(Opacity=80);
+        -moz-opacity: 0.5;
+        opacity: 0.5;
+        width: 100px;
+        height: 25px;
+        text-align: center;
+        display: none;
+    }
+
+    .uploader-list .handle {
+        position: relative;
+        background-color: black;
+        color: white;
+        filter: alpha(Opacity=80);
+        -moz-opacity: 0.5;
+        opacity: 0.5;
+        width: 100px;
+        text-align: right;
+        height: 18px;
+        margin-bottom: -18px;
+        display: none;
+    }
+
+    .uploader-list .handle i {
+        margin-right: 5px;
+    }
+
+    .uploader-list .handle i:hover {
+        cursor: pointer;
+    }
+
+    .uploader-list .file-iteme {
+        margin: 12px 0 0 15px;
+        padding: 1px;
+        float: left;
+    }
+</style>
+<body>
+<div class="layui-fluid" style="padding-top: 20px">
+    <form class="layui-form layui-form-pane" action="">
+        <input type="hidden" name="id" value="{$info.id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">地址</label>
+            <div class="layui-input-block">
+                <input type="text" name="address" value="{$info.address}" lay-verify="required" autocomplete="off" placeholder="请输入地址" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">土地分类</label>
+            <div class="layui-input-inline " >
+                <select class="layui-select"name="type_id">
+                    <option value="">请选择</option>
+                    {volist name="landType" id="vo"}
+                    <option value="{$vo.id}" {if $vo.id == $info.type_id} selected{/if}>{$vo.title}</option>
+                    {/volist}
+                </select>
+
+            </div>
+            <label class="layui-form-label">流转分类</label>
+            <div class="layui-input-inline">
+                <select class="layui-select"  name="lation_id">
+                    <option value="">请选择</option>
+                    {volist name="latinType" id="vo"}
+                    <option value="{$vo.id}" {if $vo.id == $info.lation_id} selected{/if}>{$vo.title}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">面积</label>
+                <div class="layui-input-block">
+                    <input type="text" name="mu" value="{$info.mu}"  lay-verify="required" autocomplete="off"  class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">价格</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="price"  value="{$info.price}" lay-verify="required"autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">年限</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="year" value="{$info.year}"  lay-verify="required"autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">转态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="显示" {if $info.status == 1}checked{/if}>
+                <input type="radio" name="status" value="-1" title="隐藏" {if $info.status == -1}checked{/if}>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-upload">
+                <button type="button" class="layui-btn" id="test2">上传相册图集</button>
+                <blockquote  class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;width: 88%">
+                    预览图：
+                    <div class="layui-upload-list uploader-list" style="overflow: auto;" id="uploader-list">
+
+                        {notempty name="info.picture"}
+                        {volist name="info['picture']" id="vo"}
+                        <div id="" class="file-iteme">
+                            <div class="handle"><i class="layui-icon layui-icon-delete"></i></div>
+                            <img id="img" style="width: 100px;height: 100px;" src="{$vo}">
+                            <div class="info"></div>
+                            <input type="hidden" name="picture[]" value='{$vo}'>
+                        </div>
+                        {/volist}
+                        {/notempty}
+                    </div>
+                </blockquote>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button type="button" name="video_upload" class="layui-btn btn_upload_video">
+                <i class="layui-icon">&#xe652;</i>上传视频
+            </button>
+            <br><br>
+            <div class="layui-progress layui-progress-big" lay-showpercent="true" lay-filter="progressBar">
+                <div id="progressBar" pb_loading_tag="1" class="layui-progress-bar layui-bg-red" lay-percent="0%"></div>
+            </div>
+            <br>
+
+
+
+            {empty name="info.video"}
+            <video class="video-upload-view" width="228px" height="228px" src="" controls="controls" style="display: none"></video>
+            {else /}
+            <video class="video-upload-view" width="228px" height="228px" src="{$info.video}" controls="controls" ></video>
+            {/empty}
+            <input type="hidden" name="video" class="save_url" value="{$info.video}">
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">土地介绍</label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容"  name="intro" class="layui-textarea">{$info.intro}</textarea>
+            </div>
+        </div>
+        <div class="layui-form-item layui-layout-admin " style="width: 100%">
+            <div class="layui-input-block">
+                <div class="layui-footer" style="left: 0px;text-align: center;">
+                    <button type="submit" class="layui-btn" lay-submit="" lay-filter="add">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="__layuiadmin__/layui/layui.js"></script>
+<script src="/static/admin/js/http.js"></script>
+
+<script>
+
+
+    layui.use(['form', 'layedit', 'upload','laydate','element'], function(){
+        var $ = layui.$
+            ,form = layui.form
+            ,layer = layui.layer
+        var upload = layui.upload;
+        var element = layui.element;
+        var loading_count = 0;
+        /*鼠标悬浮*/
+        $(document).on("mouseenter mouseleave", ".file-iteme", function(event){
+            if(event.type === "mouseenter"){
+                //鼠标悬浮
+                $(this).children(".info").fadeIn("fast");
+                $(this).children(".handle").fadeIn("fast");
+            }else if(event.type === "mouseleave") {
+                //鼠标离开
+                $(this).children(".info").hide();
+                $(this).children(".handle").hide();
+            }
+        });
+
+        /*上传图片*/
+        upload.render({
+            elem: '#test2'
+            ,url: $api+'admin/Upload/upload'
+            ,multiple: true
+            ,before: function(obj){
+                layer.msg('图片上传中...', {
+                    icon: 16,
+                    shade: 0.01,
+                    time: 0
+                })
+            }
+            ,done: function(res){
+                layer.close(layer.msg());//关闭上传提示窗口
+                if (res.status ==0){
+                    return  layer.msg(res.msg, {time:2000, shade:0.3});
+                }else
+                    $('#uploader-list').append(
+                        '<div id="" class="file-iteme">' +
+                        '<div class="handle"><i class="layui-icon layui-icon-delete"></i></div>' +
+                        '<img id="img" style="width: 100px;height: 100px;" src='+ res.src +'>' +
+                        '<div class="info">' + res.title + '</div>' +
+                        '<input type="hidden" name="picture[]" value='+ res.src +'>'+
+                        '</div>'
+                    );
+                //上传完毕
+            }
+        });
+
+        /*删除图片未完成*/
+        $(document).on("click", ".file-iteme img", function(event){
+            var img =$(this).attr('src');
+            console.log(img)
+        });
+
+        $(document).on("click", ".video-upload-view", function(event){
+            var img =$(this).attr('src');
+            $.ajax({
+                url: $api+'admin/Upload/delete',
+                type: "post",
+                data: {src:img},
+                success : function(res) {
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {time:2000, shade:0.3}, function (){
+                            // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                            // // table.reload('test');
+                            // layer.close(index);
+                            window.parent.location.reload();
+                            parent.layer.close(index);     //添加成功之后销毁当前弹窗
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 5});
+                    }
+                },
+            });
+            return false;
+
+            console.log(img)
+        });
+        /*上传视频*/
+        upload.render({
+            elem: '.btn_upload_video'
+            ,exts: 'mp4|flv' //设置一些后缀，用于演示前端验证和后端的验证
+            ,url: $api+'admin/Upload/video'
+            ,accept: 'video' //视频
+            , before: function (obj) {
+                loading_count = 0;
+                $("#progressBar").attr('pb_loading_tag',1);
+                element.progress('progressBar', '0%');
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('.video-upload-view').attr('src', result); //图片链接（base64）
+                    $('.video-upload-view').show();
+                });
+            },
+            progress: function() {
+                //模拟loading
+                var timer = setInterval(function(){
+                    var loading = $("#progressBar").attr('pb_loading_tag');
+                    if(loading == 1){
+                        loading_count = loading_count + Math.random()*10|1;
+                        if(loading_count>98){
+                            loading_count = 98;
+                        }
+                    }else {
+                        loading_count = 100;
+                        clearInterval(timer);
+                    }
+                    //这里是虚拟的哦，其实就是为了能提示一下没上传完就可以了，哈哈...
+                    element.progress('progressBar', loading_count+'%');
+                }, 300+Math.random()*1000);
+
+            }
+            ,done: function(res){
+                //如果上传成功
+                if (res.status == 200) {
+                    $('.save_url').val(res.path);
+                    $("#progressBar").attr('pb_loading_tag',0);
+                }
+                layer.msg(res.msg);
+            }
+        });
+
+        /*
+      * 获取土地分类数据*/
+        $.ajax({
+            url:$api+'admin/LandType/getList',   //后台数据地址
+            success: function (data) {
+                $.each(data.data,function (index,item) {   //循环后台返回的json数据
+                    //new Option方法是新建一个option，第一个参数是需要显示的值，第二个参数是option的value值,然后append到下拉框中。
+                    $('#type_id').append(new Option(item.title,item.id));
+                })
+                layui.form.render("select");
+            }
+        })
+        /*
+       * 获取土地流转分类数据*/
+        $.ajax({
+            url:$api+'admin/LatinType/getList',   //后台数据地址
+            success: function (data) {
+                $.each(data.data,function (index,item) {   //循环后台返回的json数据
+                    //new Option方法是新建一个option，第一个参数是需要显示的值，第二个参数是option的value值,然后append到下拉框中。
+                    $('#lation_id').append(new Option(item.title,item.id));
+                })
+                layui.form.render("select");
+            }
+        })
+        //监听提交
+        form.on('submit(add)', function(data){
+
+            var data = data.field;
+            $.ajax({
+                url: 'doAll',
+                type : "POST",
+                async: false,
+                dataType : "json",
+                data:data,
+                success : function(res) {
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {time:2000, shade:0.3}, function (){
+                            // parent.layui.table.reload('test');//重载父页表格，参数为表格ID
+                            // // table.reload('test');
+                            // layer.close(index);
+                            window.parent.location.reload();
+                            parent.layer.close(index);     //添加成功之后销毁当前弹窗
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 5});
+                    }
+                },
+            });
+            return false;
+        });
+    });
+</script>
+</body>
+</html>
